@@ -1,7 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Work+Sans:wght@600&display=swap');
+
 body {
     margin: 0;
     height: 100vh;
-    background-color: darkgray;
+    background-color: #1B1B1B;
 }
 
 .view {
@@ -12,15 +14,17 @@ body {
 
 .header {
     height: 55px;
-    background-color: black;
-    font-family: Arial, Helvetica, sans-serif;
+    background-color: #282828;
+    font-family: 'Work Sans', sans-serif;
     font-weight: bold;
-    color: white;
+    color: rgb(255, 255, 255);
     font-size: 30px;
     padding: 5px 10px 5px 10px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    box-shadow: 0px 1px 5px #000000;
+
 }
 
 .modal {
@@ -88,8 +92,9 @@ body {
 .canvas {
     width: 100%;
     height: 100%;
-    background-color: white;
+    background-color: #282828;
     border-radius: 10px;
+    box-shadow: 0px 1px 5px #000000;
 }
 
 .background path {
@@ -99,13 +104,7 @@ body {
 
 .foreground path {
     fill: none;
-    stroke-width: 3px;
-}
-
-.brush .selection {
-    fill-opacity: .3;
-    stroke: #fff;
-    shape-rendering: crispEdges;
+    /* stroke-width: 3px; */
 }
 
 .axis line,
@@ -116,6 +115,29 @@ body {
 }
 
 .axis text {
-    text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+    text-shadow: 0 1px 0 #282828, 1px 0 0 #282828, 0 -1px 0 #282828, -1px 0 0 #282828;
     cursor: move;
+    fill: white;
+}
+
+text {
+    color: rgb(255, 255, 255);
+    font-size: 12px;
+    font-family: 'Open Sans', sans-serif;
+}
+
+#canvas-title{
+    text-anchor: middle;
+    dominant-baseline: central;
+    font-size: 20px;
+    font-family: 'Work Sans', sans-serif;
+    fill: white;
+
+}
+
+path.domain  {
+    stroke: white;
+}
+.tick line{
+    stroke:white
 }

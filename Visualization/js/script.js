@@ -1,13 +1,13 @@
 // set the dimensions and margin_c1s of the graph
-var margin_c1 = { top: 20, right: 30, bottom: 30, left: 60 },
+var margin_c1 = { top: 50, right: 35, bottom: 30, left: 70 },
     width_c1 = $('#canvas1').width() - margin_c1.left - margin_c1.right,
     height_c1 = $('#canvas1').height() - margin_c1.top - margin_c1.bottom;
 
-var margin_c2 = { top: 20, bottom: 30, inner: 60, outer: 40 },
+var margin_c2 = { top: 50, bottom: 30, inner: 60, outer: 45 },
     width_c2 = $('#canvas2').width() - margin_c2.outer,
     height_c2 = $('#canvas2').height() - margin_c2.top - margin_c2.bottom;
 
-const margin_c3 = { top: 70, right: 20, bottom: 20, left: 150 },
+const margin_c3 = { top: 100, right: 100, bottom: 25, left: 100 },
     width_c3 = $('#canvas3').width() - margin_c3.left - margin_c3.right,
     height_c3 = $('#canvas3').height() - margin_c3.top - margin_c3.bottom;
 
@@ -24,23 +24,46 @@ var c1 = d3.select("#canvas1")
     .attr("transform",
         "translate(" + margin_c1.left + "," + margin_c1.top + ")");
 
+d3.select("#canvas1")
+    .append('text')
+    .attr('id', 'canvas-title')
+    .text('Profile Bars')
+    .attr("transform", "translate(" + $('#canvas1').width() / 2 + "," + (margin_c1.top / 2) + ")")
+
 var c2 = d3.select("#canvas2")
     .append("g")
     .attr("transform",
         "translate(" + margin_c2.outer / 2 + "," + margin_c2.top + ")");
+
+d3.select("#canvas2")
+    .append('text')
+    .attr('id', 'canvas-title')
+    .text('Risk Bars')
+    .attr("transform", "translate(" + $('#canvas2').width() / 2 + "," + (margin_c2.top / 2) + ")")
 
 var c3 = d3.select("#canvas3")
     .append("g")
     .attr("transform",
         "translate(" + margin_c3.left + "," + margin_c3.top + ")");
 
+d3.select("#canvas3")
+    .append('text')
+    .attr('id', 'canvas-title')
+    .text('Profile Lines')
+    .attr("transform", "translate(" + $('#canvas3').width() / 2 + "," + ((margin_c3.top / 2) - 20) + ")")
+
 const y2Domain = ['Slight', 'Serious', 'Fatal']
 let youCluster = "profile 1"
 let selectCluster = "profile 2"
 let storeCluster
-const youColor = 'green'
-const selectColor = 'red'
-const nonselectColor = 'lightgrey'
+
+const colorMap = {
+    'profile 1': '#e41a1c',
+    'profile 2': '#377eb8',
+    'profile 3': '#4daf4a',
+    'profile 4': '#984ea3',
+    'profile 5': '#ff7f00'
+}
 
 d3.csv('data/predictions.csv').then(function (data) {
     const areas = [
@@ -70,13 +93,13 @@ d3.csv('data/predictions.csv').then(function (data) {
         }
     })
 
-    d3.select('#apply-settings').on('click', function() {
+    d3.select('#apply-settings').on('click', function () {
         const filter = {}
         areas.forEach(area => filter[area.column] = $(area.id).val())
-        let filtered = data.filter(i => 
-            Object.entries(filter).every(([k,v]) => i[k] === v))
+        let filtered = data.filter(i =>
+            Object.entries(filter).every(([k, v]) => i[k] === v))
         youCluster = `profile ${Number(filtered[0].profile) + 1}`
-        selectCluster 
+        youCluster === 'profile 1' ? selectCluster = 'profile 2' : selectCluster = 'profile 1'
         redrawDashboard()
     })
 
@@ -134,7 +157,8 @@ function redrawDashboard() {
             .attr("y", function (d) { return y(d['Cluster Labels']); })
             .attr("width", function (d) { return x(d['risk_score']); })
             .attr("height", y.bandwidth())
-            .attr("fill", d => d['Cluster Labels'] === youCluster ? youColor : d['Cluster Labels'] === selectCluster ? selectColor : nonselectColor)
+            .attr("fill", d => colorMap[d['Cluster Labels']])
+            .style('opacity', d => d['Cluster Labels'] === youCluster || d['Cluster Labels'] === selectCluster ? 1 : 0.20)
             .on('mouseenter', function (event, d) {
                 storeCluster = selectCluster
                 selectCluster = d['Cluster Labels']
@@ -149,7 +173,16 @@ function redrawDashboard() {
                 selectCluster = d['Cluster Labels']
                 redrawDashboard()
             })
-
+        
+        c1.append('text')
+            .attr('x', x(data.filter(d => d['Cluster Labels'] === youCluster)[0].risk_score) - 15)
+            .attr('y', y(youCluster) + y.bandwidth()/2)
+            .text('YOU')
+            .style('text-anchor', 'end')
+            .style('dominant-baseline', 'central')
+            .style('font-family', "'Work Sans', sans-serif")
+            .style('font-size', '20')
+            .style('fill', '#282828')
 
         const selectedMax = d3.max(selectData.concat(youData))
         // Add X axis
@@ -188,7 +221,7 @@ function redrawDashboard() {
             .attr("y", function (d, i) { return y(y2Domain[i]); })
             .attr("width", function (d) { return x(d); })
             .attr("height", y.bandwidth())
-            .attr("fill", selectColor)
+            .attr("fill", colorMap[selectCluster])
             .attr('transform', `translate(${(width_c2 / 2) + (margin_c2.inner / 2)}, 0)`)
 
 
@@ -226,7 +259,7 @@ function redrawDashboard() {
             .attr("y", function (d, i) { return y(y2Domain[i]); })
             .attr("width", function (d) { return x(0) - x(d); })
             .attr("height", y.bandwidth())
-            .attr("fill", youColor)
+            .attr("fill", colorMap[youCluster])
             .attr('transform', `translate(${0}, 0)`)
 
 
@@ -242,11 +275,10 @@ function redrawDashboard() {
             ].includes(Object.keys(datas[0])[i])) {
                 continue
             }
-            console.log('test')
-            sim.push({index: i, value:Math.abs(datas[0][Object.keys(datas[0])[i]] - datas[1][Object.keys(datas[1])[i]])})
+            sim.push({ index: i, value: Math.abs(datas[0][Object.keys(datas[0])[i]] - datas[1][Object.keys(datas[1])[i]]) })
         }
-        
-        
+
+
         // Extract the list of dimensions as keys and create a y_pc scale for each.
         dimensions = Object.keys(data[0]).filter(function (key) {
             if (key !== "") {
@@ -256,7 +288,7 @@ function redrawDashboard() {
                 return key;
             };
         });
-        dimensions = sim.sort((a,b) => b.value-a.value).slice(0, 10).map(d => d.index).map(x => dimensions[x])
+        dimensions = sim.sort((a, b) => b.value - a.value).slice(0, 10).map(d => d.index).map(x => dimensions[x])
         // console.log(dimensions);
         // Creata a x_pc scale for each dimension
         x_pc = d3.scalePoint()
@@ -264,13 +296,13 @@ function redrawDashboard() {
             .range([0, width_c3]);
 
         // Add grey background lines for context.
-        background = c3.append("g")
-            .attr("class", "background")
-            .selectAll("path")
-            .data(data)
-            .enter().append("path")
-            .attr("d", line)
-            .style('stroke', nonselectColor);
+        // background = c3.append("g")
+        //     .attr("class", "background")
+        //     .selectAll("path")
+        //     .data(data)
+        //     .enter().append("path")
+        //     .attr("d", line)
+        //     .style('stroke', nonselectColor);
 
         // Add blue foreground lines for focus.
         foreground = c3.append("g")
@@ -280,7 +312,9 @@ function redrawDashboard() {
             .enter().append("path")
             .classed('c3-line', true)
             .attr("d", line)
-            .style('stroke', d => d['Cluster Labels'] === youCluster ? youColor : d['Cluster Labels'] === selectCluster ? selectColor : nonselectColor);
+            .style('stroke', d => colorMap[d['Cluster Labels']])
+            .style('stroke-width', d => d['Cluster Labels'] === youCluster || d['Cluster Labels'] === selectCluster ? 4 : 2)
+            .style('opacity', d => d['Cluster Labels'] === youCluster || d['Cluster Labels'] === selectCluster ? 1 : 0.20);
 
         // Add a group element for each dimension.
         var g = c3.selectAll(".dimension")
@@ -317,13 +351,29 @@ function redrawDashboard() {
             .attr("class", "axis")
             .each(function (d) { d3.select(this).call(d3.axisLeft().scale(y_pc[d])); })
             .append("text")
-            .style("text-anchor", "end")
-            .attr('transform', 'translate(0,-5) rotate(10)')
+            .style("text-anchor", "middle")
+            .style('dominant-baseline', 'central')
+            .attr('id', 'pc-label')
+            .attr('transform', 'rotate(8)')
             .attr("fill", "black")
-            .attr("font-size", "12")
-            .attr("y_pc", -9)
-            .text(function (d) { return d; });
+            .style("font-size", "10")
+            .attr("y", -20)
+            .text(function (d) { return d.split('+')[0]
+                .replaceAll('_', ' ')
+                .replace(' of casualty', '')
+                .replace(' of driver', '')
+                .replace('generic make ', '')
+                .replace('casualty ', '')
+                .replace('home area type', 'home area')
+                .replace(' code', '')
+                .replace('age of vehicle', 'vehicle age')
+                .replace('age band', 'age') + ': '}).append('tspan')
+                    .text(function(d) { return d.split('+')[1]})
+                    .style('font-weight', 'bold')
+                    .style('font-size', '12');
 
+        c3.select('.foreground').raise()
+        
     })
 }
 
@@ -332,10 +382,11 @@ redrawDashboard()
 function hover() {
     c1.selectAll('.c1-rect')
         .transition()
-        .attr('fill', d => d['Cluster Labels'] === youCluster ? youColor : d['Cluster Labels'] === selectCluster ? selectColor : nonselectColor)
+        .style('opacity', d => d['Cluster Labels'] === youCluster || d['Cluster Labels'] === selectCluster || d['Cluster Labels'] === storeCluster ? 1 : 0.20)
     c3.selectAll('.c3-line')
         .transition()
-        .style('stroke', d => d['Cluster Labels'] === youCluster ? youColor : d['Cluster Labels'] === selectCluster ? selectColor : nonselectColor)
+        .style('opacity', d => d['Cluster Labels'] === youCluster || d['Cluster Labels'] === selectCluster || d['Cluster Labels'] === storeCluster ? 1 : 0.20)
+        .style('stroke-width', d => d['Cluster Labels'] === youCluster || d['Cluster Labels'] === selectCluster || d['Cluster Labels'] === storeCluster ? 4 : 2)
 }
 
 function position(d) {
