@@ -42,9 +42,54 @@ const youColor = 'green'
 const selectColor = 'red'
 const nonselectColor = 'lightgrey'
 
+d3.csv('data/predictions.csv').then(function (data) {
+    const areas = [
+        { column: 'sex_of_casualty', id: '#sex-select' },
+        { column: 'age_band_of_casualty', id: "#age-select" },
+        { column: 'casualty_home_area_type', id: "#home-type-select" },
+        { column: 'vehicle_type', id: "#vehicle-type-select" },
+        { column: 'journey_purpose_of_driver', id: "#journey-select" },
+        { column: 'engine_capacity_cc', id: "#engine-capacity-select" },
+        { column: 'propulsion_code', id: "#propulsion-select" },
+        { column: 'age_of_vehicle', id: "#vehicle-age-select" },
+        { column: 'generic_make_model', id: "#model-select" },
+    ]
+    areas.forEach(area => {
+        let cats = [...new Set(data.map(d => d[area.column]))]
+        let caseSelect = d3.select(area.id).node(),
+            option,
+            i = 0,
+            il = cats.length
 
+
+        for (; i < il; i += 1) {
+            option = document.createElement('option');
+            option.setAttribute('value', cats[i]);
+            option.appendChild(document.createTextNode(cats[i]));
+            caseSelect.appendChild(option);
+        }
+    })
+
+    d3.select('#apply-settings').on('click', function() {
+        const filter = {}
+        areas.forEach(area => filter[area.column] = $(area.id).val())
+        let filtered = data.filter(i => 
+            Object.entries(filter).every(([k,v]) => i[k] === v))
+        youCluster = `profile ${Number(filtered[0].profile) + 1}`
+        selectCluster 
+        redrawDashboard()
+    })
+
+})
+
+function redrawDashboard() {
     // Parse the Data
     d3.csv("data/profiles.csv").then(function (data) {
+
+        // clean canvas
+        const canvases = [c1, c2, c3]
+        canvases.forEach(c => c.selectAll('*').remove())
+
         data.map(d => {
             const keys = Object.keys(d);
             keys.forEach((key, index) => {
@@ -90,108 +135,22 @@ const nonselectColor = 'lightgrey'
             .attr("width", function (d) { return x(d['risk_score']); })
             .attr("height", y.bandwidth())
             .attr("fill", d => d['Cluster Labels'] === youCluster ? youColor : d['Cluster Labels'] === selectCluster ? selectColor : nonselectColor)
-            .on('mouseenter', function(event, d) {
+            .on('mouseenter', function (event, d) {
                 storeCluster = selectCluster
                 selectCluster = d['Cluster Labels']
                 hover()
             })
-            .on('mouseleave', function(event, d) {
+            .on('mouseleave', function (event, d) {
                 selectCluster = storeCluster
                 hover()
             })
+            .on('click', function (event, d) {
+                storeCluster = d['Cluster Labels']
+                selectCluster = d['Cluster Labels']
+                redrawDashboard()
+            })
 
-        
-        biBar(selectData, youData)
 
-        // Extract the list of dimensions as keys and create a y_pc scale for each.
-        dimensions = Object.keys(data[0]).filter(function (key) {
-            if (key !== "") {
-                y_pc[key] = d3.scaleLinear()
-                    .domain(d3.extent(data, function (d) { return +d[key]; }))
-                    .range([height_c3, 0]);
-                return key;
-            };
-        }).slice(1);
-        dimensions = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(x => dimensions[x])
-        // console.log(dimensions);
-        // Creata a x_pc scale for each dimension
-        x_pc = d3.scalePoint()
-            .domain(dimensions)
-            .range([0, width_c3]);
-
-        // Add grey background lines for context.
-        background = c3.append("g")
-            .attr("class", "background")
-            .selectAll("path")
-            .data(data)
-            .enter().append("path")
-            .attr("d", line)
-            .style('stroke', nonselectColor);
-
-        // Add blue foreground lines for focus.
-        foreground = c3.append("g")
-            .attr("class", "foreground")
-            .selectAll("path")
-            .data(data)
-            .enter().append("path")
-            .classed('c3-line', true)
-            .attr("d", line)
-            .style('stroke', d => d['Cluster Labels'] === youCluster ? youColor : d['Cluster Labels'] === selectCluster ? selectColor : nonselectColor);
-
-        // Add a group element for each dimension.
-        var g = c3.selectAll(".dimension")
-            .data(dimensions)
-            .enter().append("g")
-            .attr("class", "dimension")
-            .attr("transform", function (d) { return "translate(" + x_pc(d) + ")"; })
-            .call(d3.drag()
-                .on("start", function (event, d) {
-                    dragging[d] = x_pc(d);
-                    background.attr("visibility", "hidden");
-                })
-                .on("drag", function (event, d) {
-                    dragging[d] = Math.min(width_c3, Math.max(0, event.x));
-                    foreground.attr("d", line);
-                    dimensions.sort(function (a, b) { return position(a) - position(b); });
-                    x_pc.domain(dimensions);
-                    g.attr("transform", function (d) { return "translate(" + position(d) + ")"; })
-                })
-                .on("end", function (event, d) {
-                    delete dragging[d];
-                    transition(d3.select(this)).attr("transform", "translate(" + x_pc(d) + ")");
-                    transition(foreground).attr("d", line);
-                    background
-                        .attr("d", line)
-                        .transition()
-                        .delay(500)
-                        .duration(0)
-                        .attr("visibility", null);
-                }));
-
-        // Add an axis and title.
-        g.append("g")
-            .attr("class", "axis")
-            .each(function (d) { d3.select(this).call(d3.axisLeft().scale(y_pc[d])); })
-            .append("text")
-            .style("text-anchor", "end")
-            .attr('transform', 'translate(0,-5) rotate(10)')
-            .attr("fill", "black")
-            .attr("font-size", "12")
-            .attr("y_pc", -9)
-            .text(function (d) { return d; });
-
-    })
-
-function hover() {
-    c1.selectAll('.c1-rect')
-        .transition()
-        .attr('fill', d => d['Cluster Labels'] === youCluster ? youColor : d['Cluster Labels'] === selectCluster ? selectColor : nonselectColor)
-    c3.selectAll('.c3-line')
-        .transition()
-        .style('stroke', d => d['Cluster Labels'] === youCluster ? youColor : d['Cluster Labels'] === selectCluster ? selectColor : nonselectColor)
-}
-
-function biBar(selectData, youData) {
         const selectedMax = d3.max(selectData.concat(youData))
         // Add X axis
         var x = d3.scaleLinear()
@@ -269,6 +228,114 @@ function biBar(selectData, youData) {
             .attr("height", y.bandwidth())
             .attr("fill", youColor)
             .attr('transform', `translate(${0}, 0)`)
+
+
+        let datas = data.filter(d => d['Cluster Labels'] === youCluster || d['Cluster Labels'] === selectCluster)
+        let sim = []
+        for (let i = 1; i < Object.keys(datas[0]).length; i++) {
+            if ([
+                'risk_score',
+                'count',
+                'casualty_severity_name+Slight',
+                'casualty_severity_name+Serious',
+                'casualty_severity_name+Fatal'
+            ].includes(Object.keys(datas[0])[i])) {
+                continue
+            }
+            console.log('test')
+            sim.push({index: i, value:Math.abs(datas[0][Object.keys(datas[0])[i]] - datas[1][Object.keys(datas[1])[i]])})
+        }
+        
+        
+        // Extract the list of dimensions as keys and create a y_pc scale for each.
+        dimensions = Object.keys(data[0]).filter(function (key) {
+            if (key !== "") {
+                y_pc[key] = d3.scaleLinear()
+                    .domain(d3.extent(data, function (d) { return +d[key]; }))
+                    .range([height_c3, 0]);
+                return key;
+            };
+        });
+        dimensions = sim.sort((a,b) => b.value-a.value).slice(0, 10).map(d => d.index).map(x => dimensions[x])
+        // console.log(dimensions);
+        // Creata a x_pc scale for each dimension
+        x_pc = d3.scalePoint()
+            .domain(dimensions)
+            .range([0, width_c3]);
+
+        // Add grey background lines for context.
+        background = c3.append("g")
+            .attr("class", "background")
+            .selectAll("path")
+            .data(data)
+            .enter().append("path")
+            .attr("d", line)
+            .style('stroke', nonselectColor);
+
+        // Add blue foreground lines for focus.
+        foreground = c3.append("g")
+            .attr("class", "foreground")
+            .selectAll("path")
+            .data(data)
+            .enter().append("path")
+            .classed('c3-line', true)
+            .attr("d", line)
+            .style('stroke', d => d['Cluster Labels'] === youCluster ? youColor : d['Cluster Labels'] === selectCluster ? selectColor : nonselectColor);
+
+        // Add a group element for each dimension.
+        var g = c3.selectAll(".dimension")
+            .data(dimensions)
+            .enter().append("g")
+            .attr("class", "dimension")
+            .attr("transform", function (d) { return "translate(" + x_pc(d) + ")"; })
+            .call(d3.drag()
+                .on("start", function (event, d) {
+                    dragging[d] = x_pc(d);
+                    background.attr("visibility", "hidden");
+                })
+                .on("drag", function (event, d) {
+                    dragging[d] = Math.min(width_c3, Math.max(0, event.x));
+                    foreground.attr("d", line);
+                    dimensions.sort(function (a, b) { return position(a) - position(b); });
+                    x_pc.domain(dimensions);
+                    g.attr("transform", function (d) { return "translate(" + position(d) + ")"; })
+                })
+                .on("end", function (event, d) {
+                    delete dragging[d];
+                    transition(d3.select(this)).attr("transform", "translate(" + x_pc(d) + ")");
+                    transition(foreground).attr("d", line);
+                    background
+                        .attr("d", line)
+                        .transition()
+                        .delay(500)
+                        .duration(0)
+                        .attr("visibility", null);
+                }));
+
+        // Add an axis and title.
+        g.append("g")
+            .attr("class", "axis")
+            .each(function (d) { d3.select(this).call(d3.axisLeft().scale(y_pc[d])); })
+            .append("text")
+            .style("text-anchor", "end")
+            .attr('transform', 'translate(0,-5) rotate(10)')
+            .attr("fill", "black")
+            .attr("font-size", "12")
+            .attr("y_pc", -9)
+            .text(function (d) { return d; });
+
+    })
+}
+
+redrawDashboard()
+
+function hover() {
+    c1.selectAll('.c1-rect')
+        .transition()
+        .attr('fill', d => d['Cluster Labels'] === youCluster ? youColor : d['Cluster Labels'] === selectCluster ? selectColor : nonselectColor)
+    c3.selectAll('.c3-line')
+        .transition()
+        .style('stroke', d => d['Cluster Labels'] === youCluster ? youColor : d['Cluster Labels'] === selectCluster ? selectColor : nonselectColor)
 }
 
 function position(d) {
@@ -284,6 +351,5 @@ function transition(g) {
 function line(d) {
     return d3.line()(dimensions.map(function (key) { return [x_pc(key), y_pc[key](d[key])]; }));
 }
-
 
 
