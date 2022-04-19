@@ -135,6 +135,16 @@ text {
 
 }
 
+#canvas-sub-title{
+    text-anchor: middle;
+    dominant-baseline: central;
+    font-size: 12px;
+    font-family: 'Open Sans', sans-serif;
+    fill: white;
+    font-style: italic;
+
+}
+
 path.domain  {
     stroke: white;
 }

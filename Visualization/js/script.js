@@ -1,13 +1,13 @@
 // set the dimensions and margin_c1s of the graph
-var margin_c1 = { top: 50, right: 35, bottom: 30, left: 70 },
+var margin_c1 = { top: 60, right: 35, bottom: 30, left: 70 },
     width_c1 = $('#canvas1').width() - margin_c1.left - margin_c1.right,
     height_c1 = $('#canvas1').height() - margin_c1.top - margin_c1.bottom;
 
-var margin_c2 = { top: 50, bottom: 30, inner: 60, outer: 45 },
+var margin_c2 = { top: 60, bottom: 30, inner: 60, outer: 45 },
     width_c2 = $('#canvas2').width() - margin_c2.outer,
     height_c2 = $('#canvas2').height() - margin_c2.top - margin_c2.bottom;
 
-const margin_c3 = { top: 100, right: 100, bottom: 25, left: 100 },
+const margin_c3 = { top: 90, right: 100, bottom: 25, left: 100 },
     width_c3 = $('#canvas3').width() - margin_c3.left - margin_c3.right,
     height_c3 = $('#canvas3').height() - margin_c3.top - margin_c3.bottom;
 
@@ -18,6 +18,8 @@ var x_pc,
     background,
     foreground;
 
+let noFeatures = 10
+
 // append the svg object to the body of the page
 var c1 = d3.select("#canvas1")
     .append("g")
@@ -27,8 +29,14 @@ var c1 = d3.select("#canvas1")
 d3.select("#canvas1")
     .append('text')
     .attr('id', 'canvas-title')
-    .text('Profile Bars')
-    .attr("transform", "translate(" + $('#canvas1').width() / 2 + "," + (margin_c1.top / 2) + ")")
+    .text('Risk Profiles')
+    .attr("transform", "translate(" + $('#canvas1').width() / 2 + "," + ((margin_c1.top / 2) - 10) + ")")
+
+d3.select("#canvas1")
+    .append('text')
+    .attr('id', 'canvas-sub-title')
+    .text('(risk scores calculated as a weighted sum over the associated risk distribution)')
+    .attr("transform", "translate(" + $('#canvas1').width() / 2 + "," + ((margin_c1.top / 2) + 10) + ")")
 
 var c2 = d3.select("#canvas2")
     .append("g")
@@ -38,8 +46,15 @@ var c2 = d3.select("#canvas2")
 d3.select("#canvas2")
     .append('text')
     .attr('id', 'canvas-title')
-    .text('Risk Bars')
-    .attr("transform", "translate(" + $('#canvas2').width() / 2 + "," + (margin_c2.top / 2) + ")")
+    .text('Associated Risk Distribution')
+    .attr("transform", "translate(" + $('#canvas2').width() / 2 + "," + ((margin_c2.top / 2) - 10) + ")").append('text')
+
+d3.select("#canvas2")
+    .append('text')
+    .attr('id', 'canvas-sub-title')
+    .text('(number of casualties observed in 2020 for selected profiles)')
+    .attr("transform", "translate(" + $('#canvas2').width() / 2 + "," + ((margin_c2.top / 2) + 10) + ")").append('text')
+
 
 var c3 = d3.select("#canvas3")
     .append("g")
@@ -49,8 +64,38 @@ var c3 = d3.select("#canvas3")
 d3.select("#canvas3")
     .append('text')
     .attr('id', 'canvas-title')
-    .text('Profile Lines')
+    .text('Profile Compositions')
     .attr("transform", "translate(" + $('#canvas3').width() / 2 + "," + ((margin_c3.top / 2) - 20) + ")")
+
+d3.select("#canvas3")
+    .append('text')
+    .attr('id', 'canvas-sub-title')
+    .text('(most contrastive attributes for selected profiles)')
+    .attr("transform", "translate(" + $('#canvas3').width() / 2 + "," + ((margin_c3.top / 2) - 0) + ")")
+
+d3.select("#canvas3")
+    .append('text')
+    .attr('id', 'canvas-title')
+    .text('+')
+    .attr("transform", "translate(" + ($('#canvas3').width() - margin_c3.bottom) + "," + ((margin_c3.top / 2) - 20) + ")")
+    .style('text-anchor', 'end')
+    .style('font-size', '30')
+    .on('click', function() {
+        noFeatures++
+        redrawDashboard()
+    })
+
+d3.select("#canvas3")
+    .append('text')
+    .attr('id', 'canvas-title')
+    .text('-')
+    .attr("transform", "translate(" + ($('#canvas3').width() - margin_c3.bottom - 30) + "," + ((margin_c3.top / 2) - 20) + ")")
+    .style('text-anchor', 'end')
+    .style('font-size', '30')
+    .on('click', function() {
+        noFeatures--
+        redrawDashboard()
+    })
 
 const y2Domain = ['Slight', 'Serious', 'Fatal']
 let youCluster = "profile 1"
@@ -133,7 +178,7 @@ function redrawDashboard() {
             .attr("transform", "translate(0," + height_c1 + ")")
             .call(d3.axisBottom(x)
                 .tickValues(data.map(d => d['risk_score']))
-                .tickFormat(d => d3.format('0.0%')(d / d3.max(data.map(d => d['risk_score']))))
+                .tickFormat((d,i) => i === 0 ? 'MAX' : d3.format('0.0%')(d / d3.max(data.map(d => d['risk_score']))))
             )
             .selectAll("text")
             .attr("transform", "translate(0,0)rotate(0)")
@@ -143,7 +188,8 @@ function redrawDashboard() {
         var y = d3.scaleBand()
             .range([0, height_c1])
             .domain(data.map(function (d) { return d['Cluster Labels']; }))
-            .padding(.1);
+            .paddingInner(.1)
+            .paddingOuter(.0);
         c1.append("g")
             .call(d3.axisLeft(y))
 
@@ -203,7 +249,8 @@ function redrawDashboard() {
         var y = d3.scaleBand()
             .range([0, height_c2])
             .domain(y2Domain)
-            .padding(.1);
+            .paddingInner(.1)
+            .paddingOuter(.0);
         c2.append("g")
             .call(d3.axisLeft(y))
             .attr('transform', `translate(${(width_c2 / 2) + (margin_c2.inner / 2)}, 0)`)
@@ -243,7 +290,8 @@ function redrawDashboard() {
         var y = d3.scaleBand()
             .range([0, height_c2])
             .domain(y2Domain)
-            .padding(.1);
+            .paddingInner(.1)
+            .paddingOuter(.0);
         c2.append("g")
             .call(d3.axisRight(y)
                 .tickFormat(''))
@@ -288,21 +336,17 @@ function redrawDashboard() {
                 return key;
             };
         });
-        dimensions = sim.sort((a, b) => b.value - a.value).slice(0, 10).map(d => d.index).map(x => dimensions[x])
+
+
+        dimensions = sim.sort((a, b) => b.value - a.value).slice(0, noFeatures).map(d => d.index).map(x => dimensions[x])
         // console.log(dimensions);
         // Creata a x_pc scale for each dimension
         x_pc = d3.scalePoint()
             .domain(dimensions)
-            .range([0, width_c3]);
+            .range([0, width_c3])
+            ;
 
-        // Add grey background lines for context.
-        // background = c3.append("g")
-        //     .attr("class", "background")
-        //     .selectAll("path")
-        //     .data(data)
-        //     .enter().append("path")
-        //     .attr("d", line)
-        //     .style('stroke', nonselectColor);
+        
 
         // Add blue foreground lines for focus.
         foreground = c3.append("g")
@@ -314,7 +358,21 @@ function redrawDashboard() {
             .attr("d", line)
             .style('stroke', d => colorMap[d['Cluster Labels']])
             .style('stroke-width', d => d['Cluster Labels'] === youCluster || d['Cluster Labels'] === selectCluster ? 4 : 2)
-            .style('opacity', d => d['Cluster Labels'] === youCluster || d['Cluster Labels'] === selectCluster ? 1 : 0.20);
+            .style('opacity', d => d['Cluster Labels'] === youCluster || d['Cluster Labels'] === selectCluster ? 1 : 0.20)
+            .on('mouseenter', function (event, d) {
+                storeCluster = selectCluster
+                selectCluster = d['Cluster Labels']
+                hover()
+            })
+            .on('mouseleave', function (event, d) {
+                selectCluster = storeCluster
+                hover()
+            })
+            .on('click', function (event, d) {
+                storeCluster = d['Cluster Labels']
+                selectCluster = d['Cluster Labels']
+                redrawDashboard()
+            });
 
         // Add a group element for each dimension.
         var g = c3.selectAll(".dimension")
@@ -349,12 +407,12 @@ function redrawDashboard() {
         // Add an axis and title.
         g.append("g")
             .attr("class", "axis")
-            .each(function (d) { d3.select(this).call(d3.axisLeft().scale(y_pc[d])); })
+            .each(function (d) { d3.select(this).call(d3.axisLeft().scale(y_pc[d]).tickFormat(d => (digits(d) < 4 ? d3.format(',.0%')(d) : d3.format(',.1%')(d))))})
             .append("text")
             .style("text-anchor", "middle")
             .style('dominant-baseline', 'central')
             .attr('id', 'pc-label')
-            .attr('transform', 'rotate(8)')
+            .attr('transform', 'rotate(0)')
             .attr("fill", "black")
             .style("font-size", "10")
             .attr("y", -20)
@@ -370,10 +428,9 @@ function redrawDashboard() {
                 .replace('age band', 'age') + ': '}).append('tspan')
                     .text(function(d) { return d.split('+')[1]})
                     .style('font-weight', 'bold')
-                    .style('font-size', '12');
+                    .style('font-size', '12')
 
-        c3.select('.foreground').raise()
-        
+        c3.select('.foreground').raise()        
     })
 }
 
@@ -402,5 +459,16 @@ function transition(g) {
 function line(d) {
     return d3.line()(dimensions.map(function (key) { return [x_pc(key), y_pc[key](d[key])]; }));
 }
+
+function digits(value) {
+    value = "" + value;
+    var res = 0;
+    for (var i = 0, len = value.length; i < len; i++){
+      if (value[i]==="e")break;
+      if (+value[i]>=0)
+        res++;
+  }
+    return res;
+  };
 
 
