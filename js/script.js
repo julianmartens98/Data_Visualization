@@ -80,6 +80,7 @@ d3.select("#canvas3")
     .attr("transform", "translate(" + ($('#canvas3').width() - margin_c3.bottom) + "," + ((margin_c3.top / 2) - 20) + ")")
     .style('text-anchor', 'end')
     .style('font-size', '30')
+    .style('cursor', 'pointer')
     .on('click', function() {
         noFeatures++
         redrawDashboard()
@@ -92,14 +93,15 @@ d3.select("#canvas3")
     .attr("transform", "translate(" + ($('#canvas3').width() - margin_c3.bottom - 30) + "," + ((margin_c3.top / 2) - 20) + ")")
     .style('text-anchor', 'end')
     .style('font-size', '30')
+    .style('cursor', 'pointer')
     .on('click', function() {
         noFeatures--
         redrawDashboard()
     })
 
 const y2Domain = ['Slight', 'Serious', 'Fatal']
-let youCluster = "profile 1"
-let selectCluster = "profile 2"
+let youCluster = "profile 3"
+let selectCluster = "profile 5"
 let storeCluster
 
 const colorMap = {
