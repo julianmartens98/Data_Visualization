@@ -1,93 +1,143 @@
-<!-- example# -->
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <!-- <meta charset="utf-8" /> -->
     <title>Risk Profiler</title>
+
+    <!-- importing jquery for questionnaire interaction -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"
         integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+
+    <!-- importing bootstrap for quationnaire window styling -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
         crossorigin="anonymous"></script>
+
+    <!-- importing custom stylesheet -->
     <link rel="stylesheet" href="css/style.css" />
 
 </head>
 
 <body>
+
+    <!-- main view -->
     <div class="view">
+
+        <!-- title area -->
         <div class="header">
             <div>Risk Profiler</div>
-            <div><button type="button" id='info-gear' class="btn"
-                    style="background-color:transparent" data-bs-toggle="modal" data-bs-target="#exampleModal">
+
+            <!-- user questionnaire -->
+            <div><button type="button" id='info-gear' class="btn" style="background-color:transparent"
+                    data-bs-toggle="modal" data-bs-target="#exampleModal">
                     ⚙️
                 </button>
-            <!-- Modal -->
-            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">Settings</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <h6 id="exampleModalLabel" style="margin-top:0px;">What is your sex?</h6>
-                            <select id="sex-select" class="form-control" style="font-size: 15px; font-family: 'Open Sans', sans-serif;" ><option value="" selected disabled hidden>select option</option></select>
-                            <h6 id="exampleModalLabel">What is your age?</h6>
-                            <select id="age-select" class="form-control" style="font-size: 15px; font-family: 'Open Sans', sans-serif;"><option value="" selected disabled hidden>select option</option></select>
-                            <h6 id="exampleModalLabel">Where do you live?</h6>
-                            <select id="home-type-select" class="form-control" style="font-size: 15px; font-family: 'Open Sans', sans-serif;"><option value="" selected disabled hidden>select option</option></select>
-                            <h6 id="exampleModalLabel">Where do you travel to?</h6>
-                            <select id="journey-select" class="form-control" style="font-size: 15px; font-family: 'Open Sans', sans-serif;"><option value="" selected disabled hidden>select option</option></select>
-                            <h6 id="exampleModalLabel">What do you drive?</h6>
-                            <select id="vehicle-type-select" class="form-control" style="font-size: 15px; font-family: 'Open Sans', sans-serif;"><option value="" selected disabled hidden>select option</option></select>
-                            <h6 id="exampleModalLabel">How powerfull is your vehicle</h6>
-                            <select id="engine-capacity-select" class="form-control" style="font-size: 15px; font-family: 'Open Sans', sans-serif;"><option value="" selected disabled hidden>select option</option></select>
-                            <h6 id="exampleModalLabel">What does your vehicle drive on?</h6>
-                            <select id="propulsion-select" class="form-control" style="font-size: 15px; font-family: 'Open Sans', sans-serif;"><option value="" selected disabled hidden>select option</option></select>
-                            <h6 id="exampleModalLabel">How old is your vehicle?</h6>
-                            <select id="vehicle-age-select" class="form-control" style="font-size: 15px; font-family: 'Open Sans', sans-serif;"><option value="" selected disabled hidden>select option</option></select>
-                            <h6 id="exampleModalLabel">Of what brand is your vehicle?</h6>
-                            <select id="model-select" class="form-control" style="font-size: 15px; font-family: 'Open Sans', sans-serif;"><option value="" selected disabled hidden>select option</option></select>
-                        </div>
-                        <div class="modal-footer justify-content-between">
-                            <div style="font-family: 'Open Sans', sans-serif; font-size: 12px; font-weight: normal; line-height: 20px; font-style: italic;">Please answer every question before proceeding!<br>Clicking on apply will determine your risk profile.</div>
-                            <button type="button" class="btn btn-primary" id="apply-settings"
-                                style="background-color: #377eb8; border-color: #377eb8;">Apply</button>
+                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Settings</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <!-- questionnaire options -->
+                            <div class="modal-body">
+                                <h6 id="exampleModalLabel" style="margin-top:0px;">What is your sex?</h6>
+                                <select id="sex-select" class="form-control"
+                                    style="font-size: 15px; font-family: 'Open Sans', sans-serif;">
+                                    <option value="" selected disabled hidden>select option</option>
+                                </select>
+                                <h6 id="exampleModalLabel">What is your age?</h6>
+                                <select id="age-select" class="form-control"
+                                    style="font-size: 15px; font-family: 'Open Sans', sans-serif;">
+                                    <option value="" selected disabled hidden>select option</option>
+                                </select>
+                                <h6 id="exampleModalLabel">Where do you live?</h6>
+                                <select id="home-type-select" class="form-control"
+                                    style="font-size: 15px; font-family: 'Open Sans', sans-serif;">
+                                    <option value="" selected disabled hidden>select option</option>
+                                </select>
+                                <h6 id="exampleModalLabel">Where do you travel to?</h6>
+                                <select id="journey-select" class="form-control"
+                                    style="font-size: 15px; font-family: 'Open Sans', sans-serif;">
+                                    <option value="" selected disabled hidden>select option</option>
+                                </select>
+                                <h6 id="exampleModalLabel">What do you drive?</h6>
+                                <select id="vehicle-type-select" class="form-control"
+                                    style="font-size: 15px; font-family: 'Open Sans', sans-serif;">
+                                    <option value="" selected disabled hidden>select option</option>
+                                </select>
+                                <h6 id="exampleModalLabel">How powerfull is your vehicle</h6>
+                                <select id="engine-capacity-select" class="form-control"
+                                    style="font-size: 15px; font-family: 'Open Sans', sans-serif;">
+                                    <option value="" selected disabled hidden>select option</option>
+                                </select>
+                                <h6 id="exampleModalLabel">What does your vehicle drive on?</h6>
+                                <select id="propulsion-select" class="form-control"
+                                    style="font-size: 15px; font-family: 'Open Sans', sans-serif;">
+                                    <option value="" selected disabled hidden>select option</option>
+                                </select>
+                                <h6 id="exampleModalLabel">How old is your vehicle?</h6>
+                                <select id="vehicle-age-select" class="form-control"
+                                    style="font-size: 15px; font-family: 'Open Sans', sans-serif;">
+                                    <option value="" selected disabled hidden>select option</option>
+                                </select>
+                                <h6 id="exampleModalLabel">Of what brand is your vehicle?</h6>
+                                <select id="model-select" class="form-control"
+                                    style="font-size: 15px; font-family: 'Open Sans', sans-serif;">
+                                    <option value="" selected disabled hidden>select option</option>
+                                </select>
+                            </div>
+                            <div class="modal-footer justify-content-between">
+                                <div
+                                    style="font-family: 'Open Sans', sans-serif; font-size: 12px; font-weight: normal; line-height: 20px; font-style: italic;">
+                                    Please answer every question before proceeding!<br>Clicking on apply will determine
+                                    your risk profile.</div>
+                                <button type="button" class="btn btn-primary" id="apply-settings"
+                                    style="background-color: #377eb8; border-color: #377eb8;">Apply</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        </div>
+
+        <!-- main dashboard -->
         <div class="board">
             <div class="row1">
                 <div class="column1">
                     <div class="container" id="c1">
+                        <!-- svg canvas for the upper left risk profiles component -->
                         <svg class="canvas" id="canvas1"></svg>
                     </div>
                 </div>
                 <div class="column2">
                     <div class="container" id="c2">
+                        <!-- svg canvas for the upper right associated risk distribution component -->
                         <svg class="canvas" id="canvas2"></svg>
                     </div>
                 </div>
             </div>
             <div class="row2">
                 <div class="container" id="c3">
+                    <!-- svg canvas for the lower profile composition component -->
                     <svg class="canvas" id="canvas3"></svg>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- importing d3.js -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- importing the custom risk profiler JS script -->
     <script src="js/script.js"></script>
 </body>
 
