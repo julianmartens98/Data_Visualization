@@ -22,12 +22,15 @@ function line(d) { // function that draws the line segments to create a full lin
 }
 
 function digits(value) { // function used for dynamic formating of the profile composition y axes labels
+    
     value = "" + value;
+
     var res = 0;
-    for (var i = 0, len = value.length; i < len; i++) {
+
+    for ( var i = 0, len = value.length; i < len; i++ ) {
         if (value[i] === "e") break;
         if (+value[i] >= 0)
             res++;
-    }
+}
     return res;
 };
